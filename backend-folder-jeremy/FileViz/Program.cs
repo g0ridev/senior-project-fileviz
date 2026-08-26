@@ -1,48 +1,61 @@
-var builder = WebApplication.CreateBuilder(args);
+using System;
+using System.IO;
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+// i should put this in a class later. 
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+DirectoryInfo dir = new DirectoryInfo(@"C:\Users\bucki\Documents");
+
+
+Console.WriteLine("Welcome to FileViz!");
+Console.WriteLine("...................");
+Console.WriteLine("1. Display the Folders of this path.");
+Console.WriteLine("2. Display the Files of this path");
+//Console.WriteLine("3. Display the Tree? of this path"); // not implemented
+
+string choice = Console.ReadLine();
+
+if (choice == "1"){
+	foreach (DirectoryInfo folder in dir.GetDirectories()){
+		Console.WriteLine($"[DIR] {folder.Name} - {folder.LastWriteTime}");
+	}
+	
+}
+else if (choice == "2"){
+	foreach (FileInfo file in dir.GetFiles()){
+		Console.WriteLine($"[FILE] {file.Name} - {file.LastWriteTime}");
+	}
+	
 }
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+//else for wrong inputs.
 
 
 
-// hello this is jeremy first submission
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
