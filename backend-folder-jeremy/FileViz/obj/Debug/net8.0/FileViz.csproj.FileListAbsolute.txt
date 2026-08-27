@@ -32,3 +32,4 @@ C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-f
 C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-folder-jeremy\FileViz\obj\Debug\net8.0\FileViz.pdb
 C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-folder-jeremy\FileViz\obj\Debug\net8.0\FileViz.genruntimeconfig.cache
 C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-folder-jeremy\FileViz\obj\Debug\net8.0\ref\FileViz.dll
+C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-folder-jeremy\FileViz\bin\Debug\net8.0\current-folder-context-lookingat.json
