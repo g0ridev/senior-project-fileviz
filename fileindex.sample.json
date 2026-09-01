@@ -1,0 +1,77 @@
+{
+  "path": "C:/Users/demo",
+  "totalSize": 219902325,
+  "itemCount": {
+    "folders": 6,
+    "files": 18
+  },
+  "children": [
+    {
+      "name": "Documents",
+      "type": "folder",
+      "size": 104857600,
+      "children": [
+        {
+          "name": "School",
+          "type": "folder",
+          "size": 73400320,
+          "children": [
+            { "name": "senior-project-proposal.pdf", "type": "file", "size": 204800 },
+            { "name": "discrete-math-notes.docx", "type": "file", "size": 98304 },
+            { "name": "resume-fall2026.pdf", "type": "file", "size": 153600 }
+          ]
+        },
+        {
+          "name": "Personal",
+          "type": "folder",
+          "size": 31457280,
+          "children": [
+            { "name": "budget-2026.xlsx", "type": "file", "size": 51200 },
+            { "name": "todo.txt", "type": "file", "size": 2048 }
+          ]
+        },
+        { "name": "readme.txt", "type": "file", "size": 1024 }
+      ]
+    },
+    {
+      "name": "Pictures",
+      "type": "folder",
+      "size": 78643200,
+      "children": [
+        {
+          "name": "Screenshots",
+          "type": "folder",
+          "size": 52428800,
+          "children": [
+            { "name": "screenshot-001.png", "type": "file", "size": 2097152 },
+            { "name": "screenshot-002.png", "type": "file", "size": 1887436 },
+            { "name": "screenshot-003.png", "type": "file", "size": 3145728 }
+          ]
+        },
+        { "name": "profile.jpg", "type": "file", "size": 512000 },
+        { "name": "wallpaper.png", "type": "file", "size": 4194304 }
+      ]
+    },
+    {
+      "name": "Downloads",
+      "type": "folder",
+      "size": 31457280,
+      "children": [
+        { "name": "setup.exe", "type": "file", "size": 15728640 },
+        { "name": "archive.zip", "type": "file", "size": 10485760 },
+        { "name": "notes.pdf", "type": "file", "size": 307200 }
+      ]
+    },
+    {
+      "name": "Music",
+      "type": "folder",
+      "size": 4194304,
+      "children": [
+        { "name": "track-01.mp3", "type": "file", "size": 2097152 },
+        { "name": "track-02.mp3", "type": "file", "size": 2097152 }
+      ]
+    },
+    { "name": "desktop.ini", "type": "file", "size": 512 },
+    { "name": "notes.txt", "type": "file", "size": 2048 }
+  ]
+}
