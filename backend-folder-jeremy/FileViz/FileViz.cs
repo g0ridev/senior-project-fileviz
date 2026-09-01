@@ -1,3 +1,4 @@
+/*
 public class FileViz
 {
     private List<(string label, string fullPath, bool isDir)> items = new();
@@ -22,13 +23,29 @@ public class FileViz
         {
             if (i == selectedIndex)
             {
-                Console.BackgroundColor = ConsoleColor.White;
-                Console.ForegroundColor = ConsoleColor.Black;
+				
+                Console.BackgroundColor = ConsoleColor.DarkMagenta;
+                Console.ForegroundColor = ConsoleColor.White;
             }
+			
+			else if (items[i].isDir)
+			{
+				Console.BackgroundColor = ConsoleColor.DarkRed;
+				Console.ForegroundColor = ConsoleColor.Yellow;
+			}
+			
+			else
+			{
+				Console.BackgroundColor = ConsoleColor.DarkGreen;
+				Console.ForegroundColor = ConsoleColor.Yellow;
+				
+			}
             Console.WriteLine($"  {items[i].label}");
             Console.ResetColor();
+			
         }
     }
 	
 
 }
+*/
