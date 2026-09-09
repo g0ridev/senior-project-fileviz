@@ -4,6 +4,8 @@
 
 # Local file index (contains personal file paths — never commit)
 **/fileindex.json
+**/searchcache.json
+**/search-results.json
 
 # Build output
 bin/

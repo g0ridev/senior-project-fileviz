@@ -1,3 +1,5 @@
+//Program.cs
+
 /*
 var index = new FileVizIndex();
 index.BuildOrLoad();
@@ -9,6 +11,8 @@ foreach (var r in results)
     Console.WriteLine(r);
 */
 
-var ui = new FileVizUi(); 
+//var ui = new FileVizUi(); 
+var search = new FileVizSearch();
 
-ui.Run();
+//ui.Run();
+search.Run();
