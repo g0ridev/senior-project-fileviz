@@ -4,6 +4,8 @@
 // name / type / modified date.
 // ---------------------------------------------------------------------------
 
+import searchResultPaths from "../../search-results.json";
+
 export const FOLDERS = [
   { name: "2d zombie game", modified: "7/11/2023 4:04:03 PM" },
   { name: "2dgdot", modified: "6/15/2026 1:38:43 PM" },
@@ -98,3 +100,18 @@ export const FILES = [
   { name: "Lab3_2344_t9.zip", modified: "10/2/2024 7:35:08 PM" },
   { name: "mosnterhoror", modified: "5/6/2026 5:31:04 PM" },
 ];
+
+// Turns path string like
+// "C:\\Users\\myname\\OneDrive\\Desktop\\SaidFileName"
+//  into { name, folder, fullPath }
+
+function parseSearchResults(paths) {
+  return paths.map((fullPath) => {
+    const parts = fullPath.split("\\");
+    const name = parts[parts.length - 1]; // last segment = filename
+    const folder = parts.slice(0, -1).join("\\"); // everything before it
+    return { name, folder, fullPath };
+  });
+}
+
+export const SEARCH_RESULTS = parseSearchResults(searchResultPaths);
