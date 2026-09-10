@@ -8,10 +8,12 @@ class FileVizSearch {
 	
 	public void Run(){
 		
-		if(!File.Exists("searchcache.json")){
-			BuildIndex(@"C:\Users\bucki\");
+		if (!File.Exists(@"..\..\searchcache.json"))
+		{
+			string rootPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+			BuildIndex(rootPath);
 		}
-		
+				
 		
 		List<string> index = LoadIndex();
 		//Console.WriteLine($"Loaded {index.Count} - paths");
@@ -52,13 +54,13 @@ class FileVizSearch {
 		}
 		
 		string text = JsonSerializer.Serialize(allPaths);
-		File.WriteAllText("searchcache.json",text);
+		File.WriteAllText(@"..\..\searchcache.json", text);
 		
 	}
 	
 	
 	List<string> LoadIndex(){
-		string filepath = "searchcache.json";
+		string filepath = @"..\..\searchcache.json";
 		string text = File.ReadAllText(filepath);
 		List<string> index = JsonSerializer.Deserialize<List<string>>(text);
 		return index;
@@ -75,7 +77,7 @@ class FileVizSearch {
 		}
 		
 		string text = JsonSerializer.Serialize(results);
-		File.WriteAllText("search-results.json",text);
+		File.WriteAllText(@"..\..\search-results.json", text);
 		
 		return results;
 		
