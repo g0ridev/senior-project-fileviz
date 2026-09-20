@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
 import { FOLDERS, FILES, SEARCH_RESULTS } from "./data";
+import { useSearchResults } from "./searchResults";
 
 // File Filtering, (Ideally this should be received from the backend)
 function getFileType(name) {
@@ -40,9 +41,12 @@ function SearchPage() {
   const [query, setQuery] = useState("");
   const q = query.toLowerCase();
 
+  const liveResults = useSearchResults();
+  const searchResultsData = liveResults ?? SEARCH_RESULTS; // use live data once it exists, fall back to dummy
+
   const matchedFolders = FOLDERS.filter((f) => f.name.toLowerCase().includes(q));
   const matchedFiles = FILES.filter((f) => f.name.toLowerCase().includes(q));
-  const matchedSearchResults = SEARCH_RESULTS.filter((f) =>
+  const matchedSearchResults = searchResultsData.filter((f) =>
     f.name.toLowerCase().includes(q)
   );
 
