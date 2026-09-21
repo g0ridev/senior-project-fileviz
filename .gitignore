@@ -9,8 +9,11 @@
 **/current-folder-context-lookingAt.json
 
 # Build output
-bin/
-obj/
+backend-folder-jeremy/FileViz/bin/
+backend-folder-jeremy/FileViz/obj/
+*.dll
+*.exe
+*.pdb
 
 # Visual Studio / Rider
 .vs/
