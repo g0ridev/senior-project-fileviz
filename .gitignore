@@ -6,6 +6,7 @@
 **/fileindex.json
 **/searchcache.json
 **/search-results.json
+**/current-folder-context-lookingAt.json
 
 # Build output
 bin/

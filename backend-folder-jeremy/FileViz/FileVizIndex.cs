@@ -1,44 +1,64 @@
-/*
-// FileVizIndex.cs
+// fileVizIndex.cs
+using System.Collections.Generic;
 using System.Text.Json;
+using System.IO;
 
-public class FileVizIndex
-{
-    private HashSet<string> allPaths = new();
-    private const string CacheFile = "fileindex.json";
 
-    public void BuildOrLoad()
-    {
-        if (File.Exists(CacheFile))
-        {
-            Console.WriteLine("Loading index from cache...");
-            var json = File.ReadAllText(CacheFile);
-            allPaths = JsonSerializer.Deserialize<HashSet<string>>(json)!;
-            Console.WriteLine($"Loaded {allPaths.Count} entries.");
-            return;
-        }
 
-        Console.WriteLine("First run — scanning drive...");
-        foreach (var path in Directory.EnumerateFiles(@"C:\", "*", 
-            new EnumerationOptions 
-            { 
-                IgnoreInaccessible = true,
-                RecurseSubdirectories = true
-            }))
-        {
-            allPaths.Add(path);
-        }
 
-        File.WriteAllText(CacheFile, JsonSerializer.Serialize(allPaths));
-        Console.WriteLine($"Done. {allPaths.Count} files indexed.");
-    }
 
-    public List<string> Search(string query)
-    {
-        return allPaths
-            .Where(p => Path.GetFileName(p).Contains(query, StringComparison.OrdinalIgnoreCase))
-            .Take(50)
-            .ToList();
-    }
+class FileVizIndex {
+
+	public class FolderEntry{
+	
+		public string Name {get; set;}
+		public string FullPath {get; set;}
+		public bool IsDirectory {get; set;}
+	}
+	public void TestOnDownloads(){
+		string testPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),"Downloads");
+		Console.WriteLine($"Testing LoadFolder on: {testPath}");
+		LoadFolder(testPath);
+		Console.WriteLine("Done. Check current-folder-context-lookingAt.json");
+	}
+	
+
+
+
+	public void LoadFolder(string folderPath){
+		
+		var contents = new List<FolderEntry>();
+		
+		string[] subfolders = Directory.GetDirectories(folderPath);
+		
+		foreach(string folder in subfolders){
+			var entry = new FolderEntry();
+			entry.Name = Path.GetFileName(folder);
+			entry.FullPath = folder;
+			entry.IsDirectory = true;
+			contents.Add(entry);
+		}
+		
+		
+		string[] files = Directory.GetFiles(folderPath);
+		
+		foreach(string file in files){
+			var entry = new FolderEntry();
+			entry.Name = Path.GetFileName(file);
+			entry.FullPath = file;
+			entry.IsDirectory = false;
+			contents.Add(entry);
+		}
+		
+		
+		
+		string text = JsonSerializer.Serialize(contents);
+		File.WriteAllText(@"..\..\current-folder-context-lookingAt.json",text);
+		
+	
+	}
+	
+
+
+
 }
-*/
