@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
-import { FOLDERS, FILES } from "./data";
+import { FOLDERS, FILES, SEARCH_RESULTS } from "./data";
+import { useSearchResults } from "./searchResults";
 
 // File Filtering, (Ideally this should be received from the backend)
 function getFileType(name) {
@@ -40,12 +41,19 @@ function SearchPage() {
   const [query, setQuery] = useState("");
   const q = query.toLowerCase();
 
+  const liveResults = useSearchResults();
+  const searchResultsData = liveResults ?? SEARCH_RESULTS; // use live data once it exists, fall back to dummy
+
   const matchedFolders = FOLDERS.filter((f) => f.name.toLowerCase().includes(q));
   const matchedFiles = FILES.filter((f) => f.name.toLowerCase().includes(q));
+  const matchedSearchResults = searchResultsData.filter((f) =>
+    f.name.toLowerCase().includes(q)
+  );
 
   return (
     <div>
       <h2>Search</h2>
+
       <input
         type="text"
         placeholder="Search folders and files..."
@@ -105,6 +113,28 @@ function SearchPage() {
           ))}
         </tbody>
       </table>
+
+      <h3>Search Results ({matchedSearchResults.length})</h3>
+      <table
+        border="1"
+        cellPadding="6"
+        style={{ width: "100%", borderColor: "#555", borderCollapse: "collapse" }}
+      >
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Folder</th>
+          </tr>
+        </thead>
+        <tbody>
+          {matchedSearchResults.map((f) => (
+            <tr key={f.fullPath}>
+              <td>{f.name}</td>
+              <td>{f.folder}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -117,8 +147,10 @@ function StoragePage() {
     <div>
       <h2>Files by Type</h2>
       <p style={{ color: "#aaaaaa", fontSize: 13 }}>
-        Note: Dummy Data
+        Backend doesn't report file sizes yet, so this counts files per type
+        instead of bytes used.
       </p>
+
       <div style={{ display: "flex", justifyContent: "center" }}>
         <PieChart width={300} height={300}>
           <Pie data={data} dataKey="value" nameKey="name" outerRadius={100} label>
