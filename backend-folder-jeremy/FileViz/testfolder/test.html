@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Folder Contents</h2>
+<button id="backBtn" onclick="goBack()" style="display:none">⬅ Back</button>
+<div id="output"></div>
+
+<script>
+  const history = [];
+  let currentPath = "C:\\Users\\bucki\\Downloads";
+
+  function loadFolder(path) {
+    if (currentPath && path !== currentPath) {
+      history.push(currentPath);
+    }
+    currentPath = path;
+
+    document.getElementById("backBtn").style.display = history.length ? "block" : "none";
+
+    fetch(`http://localhost:5000/folder?path=${encodeURIComponent(path)}`)
+      .then(r => r.json())
+      .then(data => {
+        const div = document.getElementById("output");
+        div.innerHTML = "";
+
+		data.forEach(item => {
+		  const p = document.createElement("p");
+
+		  if (item.isDirectory) {          // camelCase
+			const btn = document.createElement("button");
+			btn.textContent = "📁 " + item.name;        // camelCase
+			btn.addEventListener("click", () => loadFolder(item.fullPath));  // camelCase
+			p.appendChild(btn);
+		  } else {
+			p.textContent = "📄 " + item.name;
+		  }
+
+		  div.appendChild(p);
+		});
+      });
+  }
+
+  function goBack() {
+    if (history.length) {
+      const prev = history.pop();
+      currentPath = prev;
+      loadFolder(prev);
+    }
+  }
+
+  loadFolder(currentPath);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>File Search</h2>
+
+<input id="pathInput" type="text"
+  value="C:\Users\bucki\Downloads"
+  style="width:500px"
+  placeholder="Root path to search in" />
+<br><br>
+<input id="queryInput" type="text"
+  placeholder="Search filename..."
+  style="width:300px" />
+<button onclick="doSearch()">Search</button>
+
+<p id="status"></p>
+<div id="output"></div>
+
+<script>
+  function doSearch() {
+    const path = document.getElementById("pathInput").value;
+    const query = document.getElementById("queryInput").value;
+    const status = document.getElementById("status");
+    const div = document.getElementById("output");
+
+    div.innerHTML = "";
+    status.textContent = "Searching...";
+
+    fetch(`http://localhost:5001/search?path=${encodeURIComponent(path)}&query=${encodeURIComponent(query)}`)
+      .then(r => r.json())
+      .then(data => {
+        status.textContent = `Found ${data.length} results`;
+        data.forEach(item => {
+          const p = document.createElement("p");
+          p.textContent = `📄 ${item.name} — ${item.directory}`;
+          div.appendChild(p);
+        });
+      })
+      .catch(err => {
+        status.textContent = "Error: " + err;
+      });
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter") doSearch();
+  });
+</script>
+
+</body>
+</html>
