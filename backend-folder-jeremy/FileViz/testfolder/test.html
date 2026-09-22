@@ -8,14 +8,13 @@
 
 <script>
   const history = [];
-  let currentPath = "C:\\Users\\bucki\\Downloads";
+  let currentPath = "";
 
   function loadFolder(path) {
     if (currentPath && path !== currentPath) {
       history.push(currentPath);
     }
     currentPath = path;
-
     document.getElementById("backBtn").style.display = history.length ? "block" : "none";
 
     fetch(`http://localhost:5000/folder?path=${encodeURIComponent(path)}`)
@@ -23,21 +22,18 @@
       .then(data => {
         const div = document.getElementById("output");
         div.innerHTML = "";
-
-		data.forEach(item => {
-		  const p = document.createElement("p");
-
-		  if (item.isDirectory) {          // camelCase
-			const btn = document.createElement("button");
-			btn.textContent = "📁 " + item.name;        // camelCase
-			btn.addEventListener("click", () => loadFolder(item.fullPath));  // camelCase
-			p.appendChild(btn);
-		  } else {
-			p.textContent = "📄 " + item.name;
-		  }
-
-		  div.appendChild(p);
-		});
+        data.forEach(item => {
+          const p = document.createElement("p");
+          if (item.isDirectory) {
+            const btn = document.createElement("button");
+            btn.textContent = "📁 " + item.name;
+            btn.addEventListener("click", () => loadFolder(item.fullPath));
+            p.appendChild(btn);
+          } else {
+            p.textContent = "📄 " + item.name;
+          }
+          div.appendChild(p);
+        });
       });
   }
 
@@ -49,7 +45,10 @@
     }
   }
 
-  loadFolder(currentPath);
+  // fetch user's home folder from API instead of hardcoding
+  fetch("http://localhost:5000/root")
+    .then(r => r.json())
+    .then(data => loadFolder(data.path));
 </script>
 
 </body>
