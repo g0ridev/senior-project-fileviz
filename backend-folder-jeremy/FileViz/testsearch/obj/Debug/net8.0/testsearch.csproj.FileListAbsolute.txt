@@ -24,3 +24,32 @@ C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-f
 C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.pdb
 C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.genruntimeconfig.cache
 C:\Users\bucki\Downloads\senior-project-current\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\ref\testsearch.dll
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\appsettings.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\testsearch.staticwebassets.endpoints.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\testsearch.exe
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\testsearch.deps.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\testsearch.runtimeconfig.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\testsearch.dll
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\bin\Debug\net8.0\testsearch.pdb
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\rpswa.dswa.cache.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.AssemblyInfoInputs.cache
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.AssemblyInfo.cs
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.csproj.CoreCompileInputs.cache
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.sourcelink.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\rjimswa.dswa.cache.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\rjsmrazor.dswa.cache.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\rjsmcshtml.dswa.cache.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\scopedcss\bundle\testsearch.styles.css
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\staticwebassets.build.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\staticwebassets.build.json.cache
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\staticwebassets.development.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\swae.build.ex.cache
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.dll
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\refint\testsearch.dll
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.pdb
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\testsearch.genruntimeconfig.cache
+C:\Users\birge\Documents\School Stuff\SeniorProjectGIT\senior-project-fileviz\backend-folder-jeremy\FileViz\testsearch\obj\Debug\net8.0\ref\testsearch.dll

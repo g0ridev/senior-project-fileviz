@@ -1,11 +1,1 @@
-{
-  "Version": 1,
-  "Hash": "rxSeNGYhatPryuWqAIo3Fgk5EmZKi5UjAX9Q6JZiJhs=",
-  "Source": "testsearch",
-  "BasePath": "_content/testsearch",
-  "Mode": "Default",
-  "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
-}
+{"Version":1,"Hash":"Sve67G91uZhuzIFTRWGCmwPpnIkms+gGNCiNZauGBXw=","Source":"testsearch","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}
