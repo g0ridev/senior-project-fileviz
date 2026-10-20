@@ -7,6 +7,8 @@
 **/searchcache.json
 **/search-results.json
 **/current-folder-context-lookingAt.json
+**/obj/
+**/bin/
 
 # Build output
 backend-folder-jeremy/FileViz/bin/
@@ -14,6 +16,7 @@ backend-folder-jeremy/FileViz/obj/
 *.dll
 *.exe
 *.pdb
+
 
 # Visual Studio / Rider
 .vs/

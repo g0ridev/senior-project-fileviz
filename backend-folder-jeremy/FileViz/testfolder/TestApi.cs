@@ -30,12 +30,23 @@ app.MapGet("/folder", (string? path) =>
         contents.Add(new { name = Path.GetFileName(folder), fullPath = folder, isDirectory = true });
     }
 
-    foreach (var file in Directory.GetFiles(path))
-    {
-        contents.Add(new { name = Path.GetFileName(file), fullPath = file, isDirectory = false });
-    }
+	foreach (var file in Directory.GetFiles(path))
+	{
+		var info = new FileInfo(file);
+		contents.Add(new { 
+			name = Path.GetFileName(file), 
+			fullPath = file, 
+			isDirectory = false,
+			size = info.Length,
+			extension = info.Extension,
+			lastModified = info.LastWriteTime
+		});
+	}
 
     return Results.Json(contents);
 });
 
 app.Run("http://localhost:5000");
+
+
+

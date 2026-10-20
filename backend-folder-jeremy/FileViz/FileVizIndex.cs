@@ -10,10 +10,13 @@ using System.IO;
 class FileVizIndex {
 
 	public class FolderEntry{
-	
+		
 		public string Name {get; set;}
 		public string FullPath {get; set;}
 		public bool IsDirectory {get; set;}
+		public string Size {get; set;}
+		public string Extension {get; set;}
+		public DateTime LastModified {get; set;}
 	}
 	public void TestOnDownloads(){
 		string testPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),"Downloads");
@@ -43,17 +46,21 @@ class FileVizIndex {
 		string[] files = Directory.GetFiles(folderPath);
 		
 		foreach(string file in files){
+			var info = new FileInfo(file);
 			var entry = new FolderEntry();
 			entry.Name = Path.GetFileName(file);
 			entry.FullPath = file;
 			entry.IsDirectory = false;
+			entry.Size = info.Length.ToString();
+			entry.Extension = info.Extension;
+			entry.LastModified = info.LastWriteTime;
 			contents.Add(entry);
 		}
 		
 		
 		
 		string text = JsonSerializer.Serialize(contents);
-		File.WriteAllText(@"..\..\current-folder-context-lookingAt.json",text);
+		File.WriteAllText(@"..\..\..\..\..\cache-folder-data.json", text);
 		
 	
 	}
