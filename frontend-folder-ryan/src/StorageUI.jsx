@@ -4,14 +4,72 @@ import { PieChart, Pie, Cell, Tooltip } from "recharts";
 const API = "http://localhost:5000";        //browse
 const SEARCH_API = "http://localhost:5001"; //search
 
+const IMAGE_EXTENSIONS = new Set([
+  "avif",
+  "gif",
+  "ico",
+  "icns",
+  "jpeg",
+  "jpg",
+  "png",
+  "webp",
+  "xcf",
+]);
+
+const VIDEO_EXTENSIONS = new Set([
+  "mov",
+  "mp4",
+  "mpeg",
+  "mpg",
+  "rmvb",
+  "webm",
+]);
+
+const CODE_EXTENSIONS = new Set([
+  "c",
+  "cc",
+  "cfg",
+  "class",
+  "clj",
+  "cljs",
+  "cmake",
+  "cpp",
+  "cs",
+  "cshtml",
+  "css",
+  "cxx",
+  "dart",
+  "htm",
+  "html",
+  "java",
+  "js",
+  "json",
+  "jsonc",
+  "jsx",
+  "lua",
+  "py",
+  "sh",
+  "sql",
+  "svelte",
+  "swift",
+  "ts",
+  "tsx",
+  "xml",
+  "yaml",
+  "yml",
+  "zsh",
+]);
+
 // File Filtering, (Ideally this should be received from the backend)
 function getFileType(name) {
-  const ext = name.includes(".") ? name.split(".").pop().toLowerCase() : "";
+  const lowerName = name.toLowerCase();
+  const ext = lowerName.includes(".") ? lowerName.split(".").pop() : "";
   if (ext === "blend" || ext === "blend1") return "Blender";
-  if (ext === "xcf") return "Image";
-  if (ext === "mp4") return "Video";
+  if (IMAGE_EXTENSIONS.has(ext)) return "Image";
+  if (VIDEO_EXTENSIONS.has(ext)) return "Video";
   if (ext === "zip") return "Archive";
   if (ext === "ini") return "System";
+  if (CODE_EXTENSIONS.has(ext)) return "Code";
   return "Other";
 }
 
@@ -21,12 +79,14 @@ const COLORS = {
   Video: "#EB5757",
   Archive: "#6FCF97",
   System: "#8B919B",
+  Code: "#F2994A",
   Other: "#BB6BD9",
 };
 
 // New component to browse the current folder/files
 
-function BrowsePage({ entries, path, setPath, onFilesChange }) {
+function BrowsePage({entries, path, setPath, onFilesChange, onSearchResultsChange,
+}) {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
@@ -61,6 +121,10 @@ function BrowsePage({ entries, path, setPath, onFilesChange }) {
   useEffect(() => {
     onFilesChange(files);
   }, [entries]);
+
+  useEffect(() => {
+    onSearchResultsChange(searchResults);
+  }, [searchResults, onSearchResultsChange]);
 
   return (
     <div>
@@ -172,9 +236,10 @@ function BrowsePage({ entries, path, setPath, onFilesChange }) {
 
 // Storage page (Pie Chart) *Updated*
 
-function StoragePage({ files }) {
+function StoragePage({ files, searchResults }) {
+  const displayedFiles = searchResults === null ? files : searchResults;
   const counts = {};
-  files.forEach((f) => {
+  displayedFiles.forEach((f) => {
     const type = getFileType(f.name);
     counts[type] = (counts[type] || 0) + 1;
   });
@@ -185,14 +250,20 @@ function StoragePage({ files }) {
 
   return (
     <div>
-      <h2>Files by Type (current folder)</h2>
+      <h2>
+        Files by Type ({searchResults === null ? "current folder" : "search results"})
+      </h2>
       <p style={{ color: "#aaaaaa", fontSize: 13 }}>
         Backend doesn't report file sizes yet, so this counts files per type
         instead of bytes used.
       </p>
 
       {data.length === 0 ? (
-        <p style={{ color: "#888" }}>No files in this folder yet.</p>
+        <p style={{ color: "#888" }}>
+          {searchResults === null
+            ? "No files in this folder yet."
+            : "No files in these search results."}
+        </p>
       ) : (
         <div style={{ display: "flex", justifyContent: "center" }}>
           <PieChart width={300} height={300}>
@@ -215,6 +286,7 @@ export default function App() {
   const [path, setPath] = useState(null);
   const [entries, setEntries] = useState([]);
   const [currentFiles, setCurrentFiles] = useState([]);
+  const [searchResults, setSearchResults] = useState(null);
 
   // Get starting folder on mount
   useEffect(() => {
@@ -276,9 +348,10 @@ export default function App() {
           path={path}
           setPath={setPath}
           onFilesChange={setCurrentFiles}
+          onSearchResultsChange={setSearchResults}
         />
       ) : (
-        <StoragePage files={currentFiles} />
+        <StoragePage files={currentFiles} searchResults={searchResults} />
       )}
     </div>
   );
