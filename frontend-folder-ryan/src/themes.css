@@ -1,0 +1,131 @@
+.app-shell {
+  --page-background: #2b2b2b;
+  --surface-background: #3f3f3f;
+  --text-color: #ffffff;
+  --secondary-text: #aaaaaa;
+  --muted-text: #888888;
+  --border-color: #555555;
+  min-height: 100vh;
+  padding: 20px;
+  background: var(--page-background);
+  color: var(--text-color);
+  box-sizing: border-box;
+}
+
+.app-shell[data-theme="light"] {
+  --page-background: #f5f6f8;
+  --surface-background: #ffffff;
+  --text-color: #20232a;
+  --secondary-text: #555d6b;
+  --muted-text: #6b7280;
+  --border-color: #cbd0d8;
+}
+
+.app-shell h2,
+.app-shell h3 {
+  color: var(--text-color);
+}
+
+.app-navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.theme-button,
+.theme-selector select,
+.theme-input {
+  border: 1px solid var(--border-color);
+  background: var(--surface-background);
+  color: var(--text-color);
+  padding: 6px 12px;
+}
+
+.theme-button,
+.theme-selector select {
+  cursor: pointer;
+}
+
+.theme-button:hover {
+  filter: brightness(1.12);
+}
+
+.theme-button:focus-visible,
+.theme-selector select:focus-visible,
+.theme-input:focus-visible {
+  outline: 2px solid var(--secondary-text);
+  outline-offset: 2px;
+}
+
+.theme-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  color: var(--secondary-text);
+}
+
+.theme-selector select {
+  border-radius: 4px;
+}
+
+.theme-input {
+  width: 300px;
+  max-width: 100%;
+}
+
+.secondary-text {
+  color: var(--secondary-text);
+}
+
+.muted-text {
+  color: var(--muted-text);
+}
+
+.file-table {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-collapse: collapse;
+}
+
+.file-table th,
+.file-table td {
+  border: 1px solid var(--border-color);
+  padding: 6px;
+}
+
+.result-dropdown {
+  margin: 12px 0;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  text-align: left;
+}
+
+.result-dropdown summary {
+  padding: 10px 12px;
+  background: var(--surface-background);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.result-dropdown[open] summary {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.result-dropdown .file-table {
+  border: 0;
+}
+
+.folder-row {
+  cursor: pointer;
+}
+
+.folder-row:hover {
+  background: var(--surface-background);
+}
+
+.theme-input::placeholder {
+  color: var(--muted-text);
+}

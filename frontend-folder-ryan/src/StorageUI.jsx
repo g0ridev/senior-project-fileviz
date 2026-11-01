@@ -1,77 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { getFileType } from "./fileTypes.js";
+import ThemeSelector from "./ThemeSelector.jsx";
+import "./themes.css";
 
 const API = "http://localhost:5000";        //browse
 const SEARCH_API = "http://localhost:5001"; //search
-
-const IMAGE_EXTENSIONS = new Set([
-  "avif",
-  "gif",
-  "ico",
-  "icns",
-  "jpeg",
-  "jpg",
-  "png",
-  "webp",
-  "xcf",
-]);
-
-const VIDEO_EXTENSIONS = new Set([
-  "mov",
-  "mp4",
-  "mpeg",
-  "mpg",
-  "rmvb",
-  "webm",
-]);
-
-const CODE_EXTENSIONS = new Set([
-  "c",
-  "cc",
-  "cfg",
-  "class",
-  "clj",
-  "cljs",
-  "cmake",
-  "cpp",
-  "cs",
-  "cshtml",
-  "css",
-  "cxx",
-  "dart",
-  "htm",
-  "html",
-  "java",
-  "js",
-  "json",
-  "jsonc",
-  "jsx",
-  "lua",
-  "py",
-  "sh",
-  "sql",
-  "svelte",
-  "swift",
-  "ts",
-  "tsx",
-  "xml",
-  "yaml",
-  "yml",
-  "zsh",
-]);
-
-// File Filtering, (Ideally this should be received from the backend)
-function getFileType(name) {
-  const lowerName = name.toLowerCase();
-  const ext = lowerName.includes(".") ? lowerName.split(".").pop() : "";
-  if (ext === "blend" || ext === "blend1") return "Blender";
-  if (IMAGE_EXTENSIONS.has(ext)) return "Image";
-  if (VIDEO_EXTENSIONS.has(ext)) return "Video";
-  if (ext === "zip") return "Archive";
-  if (ext === "ini") return "System";
-  if (CODE_EXTENSIONS.has(ext)) return "Code";
-  return "Other";
-}
 
 const COLORS = {
   Blender: "#5B8DEF",
@@ -144,16 +78,14 @@ async function addSearchResultSizes(results) {
 
 // New component to browse the current folder/files
 
-function BrowsePage({entries, path, setPath, onFilesChange, onSearchResultsChange,
+function BrowsePage({entries, path, setPath, query, onQueryChange, searchResults, onSearchResultsChange, onFilesChange,
 }) {
-  const [query, setQuery] = useState("");
-  const [searchResults, setSearchResults] = useState(null);
   const [searching, setSearching] = useState(false);
 
   // Debounced call to the real /search endpoint on port 5001
   useEffect(() => {
     if (!query || !path) {
-      setSearchResults(null);
+      onSearchResultsChange(null);
       return;
     }
     setSearching(true);
@@ -167,7 +99,7 @@ function BrowsePage({entries, path, setPath, onFilesChange, onSearchResultsChang
         })
         .then(addSearchResultSizes)
         .then((data) => {
-          setSearchResults(data);
+          onSearchResultsChange(data);
           setSearching(false);
         })
         .catch((err) => {
@@ -176,7 +108,7 @@ function BrowsePage({entries, path, setPath, onFilesChange, onSearchResultsChang
         });
     }, 300);
     return () => clearTimeout(handle);
-  }, [query, path]);
+  }, [query, path, onSearchResultsChange]);
 
   const folders = entries.filter((e) => e.isDirectory);
   const files = entries.filter((e) => !e.isDirectory);
@@ -185,42 +117,28 @@ function BrowsePage({entries, path, setPath, onFilesChange, onSearchResultsChang
     onFilesChange(files);
   }, [entries]);
 
-  useEffect(() => {
-    onSearchResultsChange(searchResults);
-  }, [searchResults, onSearchResultsChange]);
-
   return (
     <div>
       <h2>Browse</h2>
-      <div style={{ marginBottom: 10, color: "#aaa" }}>{path}</div>
+      <div className="secondary-text" style={{ marginBottom: 10 }}>{path}</div>
 
       <input
         type="text"
         placeholder="Search this folder tree..."
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{
-          width: 300,
-          background: "#3f3f3f",
-          color: "#ffffff",
-          border: "1px solid #555",
-          padding: "6px 8px",
-        }}
+        onChange={(e) => onQueryChange(e.target.value)}
+        className="theme-input"
       />
 
-      {searching && <p style={{ color: "#888" }}>Searching...</p>}
+      {searching && <p className="muted-text">Searching...</p>}
 
       {searchResults ? (
-        <>
-          <h3>
+        <details className="result-dropdown">
+          <summary>
             Search Results ({searchResults.length}
             {searchResults.length === 100 ? "+" : ""})
-          </h3>
-          <table
-            border="1"
-            cellPadding="6"
-            style={{ width: "100%", borderColor: "#555", borderCollapse: "collapse" }}
-          >
+          </summary>
+          <table className="file-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -240,61 +158,52 @@ function BrowsePage({entries, path, setPath, onFilesChange, onSearchResultsChang
               ))}
             </tbody>
           </table>
-        </>
+        </details>
       ) : (
         <>
-          <h3>Folders ({folders.length})</h3>
-          <table
-            border="1"
-            cellPadding="6"
-            style={{
-              width: "100%",
-              marginBottom: 20,
-              borderColor: "#555",
-              borderCollapse: "collapse",
-            }}
-          >
-            <thead>
-              <tr>
-                <th>Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              {folders.map((f) => (
-                <tr
-                  key={f.fullPath}
-                  onDoubleClick={() => setPath(f.fullPath)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <td>[DIR] {f.name}</td>
+          <details className="result-dropdown">
+            <summary>Folders ({folders.length})</summary>
+            <table className="file-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {folders.map((f) => (
+                  <tr
+                    key={f.fullPath}
+                    onDoubleClick={() => setPath(f.fullPath)}
+                    className="folder-row"
+                  >
+                    <td>[DIR] {f.name}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
 
-          <h3>Files ({files.length})</h3>
-          <table
-            border="1"
-            cellPadding="6"
-            style={{ width: "100%", borderColor: "#555", borderCollapse: "collapse" }}
-          >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Size</th>
-              </tr>
-            </thead>
-            <tbody>
-              {files.map((f) => (
-                <tr key={f.fullPath}>
-                  <td>{f.name}</td>
-                  <td>{getFileType(f.name)}</td>
-                  <td>{formatBytes(f.size)}</td>
+          <details className="result-dropdown">
+            <summary>Files ({files.length})</summary>
+            <table className="file-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Size</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {files.map((f) => (
+                  <tr key={f.fullPath}>
+                    <td>{f.name}</td>
+                    <td>{getFileType(f.name)}</td>
+                    <td>{formatBytes(f.size)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
         </>
       )}
     </div>
@@ -305,7 +214,7 @@ function BrowsePage({entries, path, setPath, onFilesChange, onSearchResultsChang
 
 // *Updated* - Shows storage types. Display adjusted
 
-function StoragePage({ files, searchResults }) {
+function StoragePage({ files, searchResults, onBackToSearch }) {
   const displayedFiles = searchResults === null ? files : searchResults;
   const sizesByType = {};
   let reportedFiles = 0;
@@ -325,21 +234,28 @@ function StoragePage({ files, searchResults }) {
 
   return (
     <div>
+      <button
+        className="theme-button"
+        onClick={onBackToSearch}
+        style={{ marginBottom: 12 }}
+      >
+        Back
+      </button>
       <h2>
         Storage by Type ({searchResults === null ? "current folder" : "search results"})
       </h2>
-      <p style={{ color: "#aaaaaa", fontSize: 13 }}>
+      <p className="secondary-text" style={{ fontSize: 13 }}>
         Total reported size: {formatBytes(totalSize)}
       </p>
       {reportedFiles < displayedFiles.length && (
-        <p style={{ color: "#aaaaaa", fontSize: 13 }}>
+        <p className="secondary-text" style={{ fontSize: 13 }}>
           Sizes are unavailable for {displayedFiles.length - reportedFiles} file(s),
           so this total may be incomplete.
         </p>
       )}
 
       {totalSize === 0 ? (
-        <p style={{ color: "#888" }}>
+        <p className="muted-text">
           {displayedFiles.length === 0
             ? searchResults === null
               ? "No files in this folder yet."
@@ -360,10 +276,22 @@ function StoragePage({ files, searchResults }) {
                   outerRadius="76%"
                 >
                   {chartData.map((entry) => (
-                    <Cell key={entry.name} fill={COLORS[entry.name] || "#888"} />
+                    <Cell
+                      key={entry.name}
+                      fill={COLORS[entry.name] || "var(--muted-text)"}
+                    />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => [formatBytes(value), "Size"]} />
+                <Tooltip
+                  formatter={(value) => [formatBytes(value), "Size"]}
+                  contentStyle={{
+                    backgroundColor: "var(--surface-background)",
+                    borderColor: "var(--border-color)",
+                    color: "var(--text-color)",
+                  }}
+                  labelStyle={{ color: "var(--text-color)" }}
+                  itemStyle={{ color: "var(--text-color)" }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -397,7 +325,7 @@ function StoragePage({ files, searchResults }) {
                     height: 12,
                     marginTop: 5,
                     borderRadius: "50%",
-                    backgroundColor: COLORS[entry.name] || "#888",
+                    backgroundColor: COLORS[entry.name] || "var(--muted-text)",
                   }}
                 />
                 <span>
@@ -415,10 +343,12 @@ function StoragePage({ files, searchResults }) {
 // Main controller for switching pages *Updated*
 export default function App() {
   const [page, setPage] = useState("browse");
+  const [theme, setTheme] = useState("dark");
   const [path, setPath] = useState(null);
   const [entries, setEntries] = useState([]);
   const [currentFiles, setCurrentFiles] = useState([]);
   const [searchResults, setSearchResults] = useState(null);
+  const [query, setQuery] = useState("");
 
   // Get starting folder on mount
   useEffect(() => {
@@ -438,40 +368,21 @@ export default function App() {
   }, [path]);
 
   return (
-    <div
-      style={{
-        padding: 20,
-        minHeight: "100vh",
-        background: "#2b2b2b",
-        color: "#ffffff",
-      }}
-    >
-      <nav style={{ marginBottom: 20 }}>
+    <div className="app-shell" data-theme={theme}>
+      <nav className="app-navigation">
         <button
+          className="theme-button"
           onClick={() => setPage("browse")}
-          style={{
-            background: "#3f3f3f",
-            color: "#ffffff",
-            border: "1px solid #555",
-            padding: "6px 12px",
-            marginRight: 8,
-            cursor: "pointer",
-          }}
         >
           Browse
         </button>
         <button
+          className="theme-button"
           onClick={() => setPage("storage")}
-          style={{
-            background: "#3f3f3f",
-            color: "#ffffff",
-            border: "1px solid #555",
-            padding: "6px 12px",
-            cursor: "pointer",
-          }}
         >
           Storage
         </button>
+        <ThemeSelector theme={theme} onThemeChange={setTheme} />
       </nav>
 
       {page === "browse" ? (
@@ -479,11 +390,18 @@ export default function App() {
           entries={entries}
           path={path}
           setPath={setPath}
-          onFilesChange={setCurrentFiles}
+          query={query}
+          onQueryChange={setQuery}
+          searchResults={searchResults}
           onSearchResultsChange={setSearchResults}
+          onFilesChange={setCurrentFiles}
         />
       ) : (
-        <StoragePage files={currentFiles} searchResults={searchResults} />
+        <StoragePage
+          files={currentFiles}
+          searchResults={searchResults}
+          onBackToSearch={() => setPage("browse")}
+        />
       )}
     </div>
   );
