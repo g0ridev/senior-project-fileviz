@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
@@ -11,13 +13,14 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 app.UseCors();
 
-// returns the current user's home folder so HTML doesn't hardcode a username
+// Returns the current user's home folder so the frontend doesn't hardcode a username
 app.MapGet("/root", () =>
 {
     var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     return Results.Json(new { path = home });
 });
 
+// Returns the contents of a folder (files + subfolders)
 app.MapGet("/folder", (string? path) =>
 {
     if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
@@ -30,23 +33,53 @@ app.MapGet("/folder", (string? path) =>
         contents.Add(new { name = Path.GetFileName(folder), fullPath = folder, isDirectory = true });
     }
 
-	foreach (var file in Directory.GetFiles(path))
-	{
-		var info = new FileInfo(file);
-		contents.Add(new { 
-			name = Path.GetFileName(file), 
-			fullPath = file, 
-			isDirectory = false,
-			size = info.Length,
-			extension = info.Extension,
-			lastModified = info.LastWriteTime
-		});
-	}
+    foreach (var file in Directory.GetFiles(path))
+    {
+        var info = new FileInfo(file);
+        contents.Add(new {
+            name = Path.GetFileName(file),
+            fullPath = file,
+            isDirectory = false,
+            size = info.Length,
+            extension = info.Extension,
+            lastModified = info.LastWriteTime
+        });
+    }
 
     return Results.Json(contents);
 });
 
+// Opens a file with its default Windows application (double-click behaviour)
+app.MapPost("/open", (string path) =>
+{
+    if (!File.Exists(path))
+        return Results.NotFound("File not found");
+
+    Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+    return Results.Ok("Opened");
+});
+
+// Deletes a file permanently
+app.MapDelete("/file", (string path) =>
+{
+    if (!File.Exists(path))
+        return Results.NotFound("File not found");
+
+    File.Delete(path);
+    return Results.Ok("Deleted");
+});
+
+// Renames (or moves) a file — same call, File.Move handles both
+app.MapPatch("/file", (string oldPath, string newPath) =>
+{
+    if (!File.Exists(oldPath))
+        return Results.NotFound("File not found");
+
+    if (File.Exists(newPath))
+        return Results.Conflict("A file with that name already exists");
+
+    File.Move(oldPath, newPath);
+    return Results.Ok("Renamed");
+});
+
 app.Run("http://localhost:5000");
-
-
-

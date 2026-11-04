@@ -26,7 +26,7 @@ app.MapGet("/search", (string path, string query) =>
                 IgnoreInaccessible = true,
                 MatchCasing = MatchCasing.CaseInsensitive
             })
-        .Take(100)
+        .Take(500)
         .Select(f => new
         {
             name = Path.GetFileName(f),
