@@ -1,55 +1,158 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <title>FileViz Nav Test</title>
+  <style>
+    body { font-family: sans-serif; background: #2b2b2b; color: #fff; padding: 20px; margin: 0; }
+    h2 { margin: 0 0 4px; }
+    #pathbar { color: #aaa; font-size: 13px; margin-bottom: 12px; word-break: break-all; }
+    button { padding: 6px 12px; background: #3f3f3f; color: #fff; border: 1px solid #555; cursor: pointer; margin-right: 6px; }
+    button:hover { background: #555; }
+    button.danger { border-color: #c0392b; color: #ff6b6b; }
+    button.danger:hover { background: #c0392b; color: #fff; }
+    #nav { margin-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    tr { cursor: pointer; }
+    tr:hover td { background: #3a3a3a; }
+    tr.selected td { background: #1a3a5c; }
+    td { padding: 6px 10px; border-bottom: 1px solid #3f3f3f; font-size: 14px; }
+    #actions { margin: 14px 0; min-height: 36px; }
+    #message { font-size: 13px; margin-top: 8px; }
+    .ok { color: #6fcf97; }
+    .err { color: #ff6b6b; }
+    input.inline { background: #3f3f3f; color: #fff; border: 1px solid #555; padding: 5px 8px; width: 260px; }
+  </style>
+</head>
 <body>
 
-<h2>Folder Contents</h2>
-<button id="backBtn" onclick="goBack()" style="display:none">⬅ Back</button>
-<div id="output"></div>
+<h2>FileViz Nav Test</h2>
+<div id="pathbar">—</div>
+
+<div id="nav">
+  <button onclick="goUp()">← Up</button>
+  <button onclick="newFolder()">+ New Folder</button>
+</div>
+
+<div id="actions"></div>
+<div id="message"></div>
+
+<table id="filetable"><tbody id="filelist"></tbody></table>
 
 <script>
-  const history = [];
+  const API = "http://localhost:5000";
   let currentPath = "";
+  let selected = null;
 
-  function loadFolder(path) {
-    if (currentPath && path !== currentPath) {
-      history.push(currentPath);
-    }
+  async function init() {
+    const r = await fetch(`${API}/root`);
+    const d = await r.json();
+    loadFolder(d.path);
+  }
+
+  async function loadFolder(path) {
     currentPath = path;
-    document.getElementById("backBtn").style.display = history.length ? "block" : "none";
+    selected = null;
+    document.getElementById("pathbar").textContent = path;
+    document.getElementById("actions").innerHTML = "";
+    document.getElementById("message").textContent = "";
 
-    fetch(`http://localhost:5000/folder?path=${encodeURIComponent(path)}`)
-      .then(r => r.json())
-      .then(data => {
-        const div = document.getElementById("output");
-        div.innerHTML = "";
-        data.forEach(item => {
-          const p = document.createElement("p");
-          if (item.isDirectory) {
-            const btn = document.createElement("button");
-            btn.textContent = "📁 " + item.name;
-            btn.addEventListener("click", () => loadFolder(item.fullPath));
-            p.appendChild(btn);
-          } else {
-            p.textContent = "📄 " + item.name;
-          }
-          div.appendChild(p);
-        });
-      });
+    const r = await fetch(`${API}/folder?path=${encodeURIComponent(path)}`);
+    const entries = await r.json();
+
+    const tbody = document.getElementById("filelist");
+    tbody.innerHTML = "";
+
+    entries.forEach(e => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${e.isDirectory ? "📁" : "📄"} ${e.name}</td>
+                      <td style="color:#888;font-size:12px">${e.isDirectory ? "folder" : (e.extension || "file")}</td>
+                      <td style="color:#888;font-size:12px">${e.isDirectory ? "" : formatBytes(e.size)}</td>`;
+      tr.onclick = () => selectEntry(e, tr);
+      tr.ondblclick = () => { if (e.isDirectory) loadFolder(e.fullPath); };
+      tbody.appendChild(tr);
+    });
   }
 
-  function goBack() {
-    if (history.length) {
-      const prev = history.pop();
-      currentPath = prev;
-      loadFolder(prev);
+  function selectEntry(e, tr) {
+    document.querySelectorAll("tr.selected").forEach(r => r.classList.remove("selected"));
+    tr.classList.add("selected");
+    selected = e;
+    renderActions();
+  }
+
+  function renderActions() {
+    if (!selected) { document.getElementById("actions").innerHTML = ""; return; }
+    const isDir = selected.isDirectory;
+    document.getElementById("actions").innerHTML = `
+      <strong style="font-size:13px;color:#aaa">Selected: ${selected.name}</strong><br><br>
+      ${!isDir ? `<button onclick="openFile()">Open</button>` : ""}
+      <button onclick="renameSelected()">Rename</button>
+      <button class="danger" onclick="deleteSelected()">Delete</button>
+    `;
+  }
+
+  async function openFile() {
+    if (!selected) return;
+    const r = await fetch(`${API}/open?path=${encodeURIComponent(selected.fullPath)}`, { method: "POST" });
+    msg(r.ok, r.ok ? "Opened." : "Failed to open.");
+  }
+
+  async function deleteSelected() {
+    if (!selected) return;
+    if (!confirm(`Delete "${selected.name}"?`)) return;
+
+    let r;
+    if (selected.isDirectory) {
+      r = await fetch(`${API}/folder?path=${encodeURIComponent(selected.fullPath)}`, { method: "DELETE" });
+    } else {
+      r = await fetch(`${API}/file?path=${encodeURIComponent(selected.fullPath)}`, { method: "DELETE" });
     }
+
+    if (r.ok) { msg(true, "Deleted."); loadFolder(currentPath); }
+    else { msg(false, await r.text()); }
   }
 
-  // fetch user's home folder from API instead of hardcoding
-  fetch("http://localhost:5000/root")
-    .then(r => r.json())
-    .then(data => loadFolder(data.path));
-</script>
+	async function renameSelected() {
+		if (!selected) return;
+		const dir = selected.fullPath.substring(0, selected.fullPath.lastIndexOf("\\"));
+		const newName = prompt("New name:", selected.name);
+		if (!newName || newName === selected.name) return;
+		const newPath = dir + "\\" + newName;
 
+		const route = selected.isDirectory ? "folder" : "file";
+		const r = await fetch(`${API}/${route}?oldPath=${encodeURIComponent(selected.fullPath)}&newPath=${encodeURIComponent(newPath)}`, { method: "PATCH" });
+		if (r.ok) { msg(true, "Renamed."); loadFolder(currentPath); }
+		else { msg(false, await r.text()); }
+	}
+
+  async function newFolder() {
+    const name = prompt("Folder name:");
+    if (!name) return;
+    const newPath = currentPath + "\\" + name;
+    const r = await fetch(`${API}/folder?path=${encodeURIComponent(newPath)}`, { method: "POST" });
+    if (r.ok) { msg(true, "Created."); loadFolder(currentPath); }
+    else { msg(false, await r.text()); }
+  }
+
+  function goUp() {
+    const parent = currentPath.substring(0, currentPath.lastIndexOf("\\"));
+    if (parent) loadFolder(parent);
+  }
+
+  function msg(ok, text) {
+    const el = document.getElementById("message");
+    el.className = ok ? "ok" : "err";
+    el.textContent = text;
+  }
+
+  function formatBytes(b) {
+    if (!b) return "0 B";
+    const u = ["B","KB","MB","GB"];
+    const i = Math.min(Math.floor(Math.log(b)/Math.log(1024)), u.length-1);
+    return `${(b/1024**i).toFixed(i===0?0:1)} ${u[i]}`;
+  }
+
+  init();
+</script>
 </body>
 </html>

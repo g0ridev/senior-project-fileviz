@@ -82,4 +82,35 @@ app.MapPatch("/file", (string oldPath, string newPath) =>
     return Results.Ok("Renamed");
 });
 
+// Creates a new folder
+app.MapPost("/folder", (string path) =>
+{
+    if (Directory.Exists(path))
+        return Results.Conflict("Folder already exists");
+    Directory.CreateDirectory(path);
+    return Results.Ok("Created");
+});
+
+// Deletes a folder and everything in it
+app.MapDelete("/folder", (string path) =>
+{
+    if (!Directory.Exists(path))
+        return Results.NotFound("Folder not found");
+    Directory.Delete(path, recursive: true);
+    return Results.Ok("Deleted");
+});
+
+// Renames a folder
+app.MapPatch("/folder", (string oldPath, string newPath) =>
+{
+    if (!Directory.Exists(oldPath))
+        return Results.NotFound("Folder not found");
+
+    if (Directory.Exists(newPath))
+        return Results.Conflict("A folder with that name already exists");
+
+    Directory.Move(oldPath, newPath);
+    return Results.Ok("Renamed");
+});
+
 app.Run("http://localhost:5000");
