@@ -11,6 +11,8 @@ const COLORS = {
   Blender: "#5B8DEF",
   Image: "#E8A33D",
   Video: "#EB5757",
+  PDF: "#C0392B",
+  Office: "#2D9CDB",
   Archive: "#6FCF97",
   System: "#8B919B",
   Code: "#F2994A",
@@ -78,7 +80,7 @@ async function addSearchResultSizes(results) {
 
 // New component to browse the current folder/files
 
-function BrowsePage({entries, path, setPath, query, onQueryChange, searchResults, onSearchResultsChange, onFilesChange,
+function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryChange, searchResults, onSearchResultsChange, onFilesChange,
 }) {
   const [searching, setSearching] = useState(false);
 
@@ -119,6 +121,15 @@ function BrowsePage({entries, path, setPath, query, onQueryChange, searchResults
 
   return (
     <div>
+      <button
+        type="button"
+        className="theme-button"
+        onClick={onBack}
+        disabled={!canGoBack}
+        style={{ marginBottom: 12 }}
+      >
+        Back
+      </button>
       <h2>Browse</h2>
       <div className="secondary-text" style={{ marginBottom: 10 }}>{path}</div>
 
@@ -145,6 +156,7 @@ function BrowsePage({entries, path, setPath, query, onQueryChange, searchResults
                 <th>Type</th>
                 <th>Size</th>
                 <th>Directory</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -154,6 +166,16 @@ function BrowsePage({entries, path, setPath, query, onQueryChange, searchResults
                   <td>{getFileType(f.name)}</td>
                   <td>{formatBytes(f.size)}</td>
                   <td>{f.directory}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="theme-button"
+                      onClick={() => setPath(f.directory)}
+                      disabled={!f.directory}
+                    >
+                      Open folder
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -345,10 +367,23 @@ export default function App() {
   const [page, setPage] = useState("browse");
   const [theme, setTheme] = useState("dark");
   const [path, setPath] = useState(null);
+  const [pathHistory, setPathHistory] = useState([]);
   const [entries, setEntries] = useState([]);
   const [currentFiles, setCurrentFiles] = useState([]);
   const [searchResults, setSearchResults] = useState(null);
   const [query, setQuery] = useState("");
+
+  function navigateToPath(nextPath) {
+    if (!nextPath || nextPath === path) return;
+    setPathHistory((history) => path ? [...history, path] : history);
+    setPath(nextPath);
+  }
+
+  function navigateBack() {
+    if (pathHistory.length === 0) return;
+    setPath(pathHistory[pathHistory.length - 1]);
+    setPathHistory(pathHistory.slice(0, -1));
+  }
 
   // Get starting folder on mount
   useEffect(() => {
@@ -389,7 +424,9 @@ export default function App() {
         <BrowsePage
           entries={entries}
           path={path}
-          setPath={setPath}
+          setPath={navigateToPath}
+          canGoBack={pathHistory.length > 0}
+          onBack={navigateBack}
           query={query}
           onQueryChange={setQuery}
           searchResults={searchResults}

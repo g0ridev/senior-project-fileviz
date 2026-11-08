@@ -19,6 +19,31 @@ const VIDEO_EXTENSIONS = new Set([
   "webm",
 ]);
 
+const OFFICE_EXTENSIONS = new Set([
+  "doc",
+  "docm",
+  "docx",
+  "dot",
+  "dotx",
+  "odp",
+  "ods",
+  "odt",
+  "pot",
+  "potx",
+  "pps",
+  "ppsx",
+  "ppt",
+  "pptm",
+  "pptx",
+  "rtf",
+  "xls",
+  "xlsb",
+  "xlsm",
+  "xlsx",
+  "xlt",
+  "xltx",
+]);
+
 const CODE_EXTENSIONS = new Set([
   "c",
   "cc",
@@ -60,6 +85,8 @@ export function getFileType(name) {
   if (ext === "blend" || ext === "blend1") return "Blender";
   if (IMAGE_EXTENSIONS.has(ext)) return "Image";
   if (VIDEO_EXTENSIONS.has(ext)) return "Video";
+  if (ext === "pdf") return "PDF";
+  if (OFFICE_EXTENSIONS.has(ext)) return "Office";
   if (ext === "zip") return "Archive";
   if (ext === "ini") return "System";
   if (CODE_EXTENSIONS.has(ext)) return "Code";
