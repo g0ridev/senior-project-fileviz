@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import {Treemap, Tooltip,ResponsiveContainer,} from "recharts";
 import { getFileType } from "./fileTypes.js";
 import ThemeSelector from "./ThemeSelector.jsx";
 import "./themes.css";
@@ -232,7 +232,46 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
   );
 }
 
-// Storage page (Pie Chart)
+// New Visualizer (Treemap)
+
+function renderTreemapNode({ x, y, width, height, name, type, value }) {
+  if (width <= 0 || height <= 0) return null;
+  const maxLabelLength = Math.floor((width - 12) / 7);
+  const label =
+    maxLabelLength > 3 && height >= 24
+      ? name.length > maxLabelLength
+        ? `${name.slice(0, maxLabelLength - 3)}...`
+        : name
+      : "";
+
+  return (
+    <g>
+      <title>{`${name} (${type}) - ${formatBytes(value)}`}</title>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        fill={COLORS[type] || "var(--muted-text)"}
+        stroke="var(--surface-background)"
+        strokeWidth={2}
+      />
+      {label && (
+        <text
+          x={x + 6}
+          y={y + 17}
+          fill="white"
+          fontSize={12}
+          pointerEvents="none"
+        >
+          {label}
+        </text>
+      )}
+    </g>
+  );
+}
+
+// Storage page (Treemap)
 
 // *Updated* - Shows storage types. Display adjusted
 
@@ -240,18 +279,27 @@ function StoragePage({ files, searchResults, onBackToSearch }) {
   const displayedFiles = searchResults === null ? files : searchResults;
   const sizesByType = {};
   let reportedFiles = 0;
+  const treemapData = [];
   displayedFiles.forEach((f) => {
     if (!Number.isFinite(f.size) || f.size < 0) return;
 
     const type = getFileType(f.name);
     sizesByType[type] = (sizesByType[type] || 0) + f.size;
     reportedFiles += 1;
+    if (f.size > 0) {
+      treemapData.push({
+        name: f.name,
+        fullPath: f.fullPath,
+        type,
+        value: f.size,
+      });
+    }
   });
   const data = Object.keys(sizesByType).map((type) => ({
     name: type,
     value: sizesByType[type],
   }));
-  const chartData = data.filter((entry) => entry.value > 0);
+  const typeTotals = data.filter((entry) => entry.value > 0);
   const totalSize = data.reduce((total, entry) => total + entry.value, 0);
 
   return (
@@ -275,7 +323,6 @@ function StoragePage({ files, searchResults, onBackToSearch }) {
           so this total may be incomplete.
         </p>
       )}
-
       {totalSize === 0 ? (
         <p className="muted-text">
           {displayedFiles.length === 0
@@ -288,22 +335,17 @@ function StoragePage({ files, searchResults, onBackToSearch }) {
         </p>
       ) : (
         <div style={{ width: "100%", maxWidth: 640, margin: "0 auto" }}>
+          <p className="secondary-text" style={{ fontSize: 13 }}>
+            Files shown as blocks. Larger block = larger file.
+          </p>
           <div style={{ width: "100%", height: 480 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius="76%"
-                >
-                  {chartData.map((entry) => (
-                    <Cell
-                      key={entry.name}
-                      fill={COLORS[entry.name] || "var(--muted-text)"}
-                    />
-                  ))}
-                </Pie>
+              <Treemap
+                data={treemapData}
+                dataKey="value"
+                nameKey="name"
+                content={renderTreemapNode}
+              >
                 <Tooltip
                   formatter={(value) => [formatBytes(value), "Size"]}
                   contentStyle={{
@@ -314,7 +356,7 @@ function StoragePage({ files, searchResults, onBackToSearch }) {
                   labelStyle={{ color: "var(--text-color)" }}
                   itemStyle={{ color: "var(--text-color)" }}
                 />
-              </PieChart>
+              </Treemap>
             </ResponsiveContainer>
           </div>
           <div
@@ -327,7 +369,7 @@ function StoragePage({ files, searchResults, onBackToSearch }) {
               boxSizing: "border-box",
             }}
           >
-            {chartData.map((entry) => (
+            {typeTotals.map((entry) => (
               <div
                 key={entry.name}
                 style={{
