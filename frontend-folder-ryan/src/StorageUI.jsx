@@ -80,9 +80,173 @@ async function addSearchResultSizes(results) {
 
 // New component to browse the current folder/files
 
-function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryChange, searchResults, onSearchResultsChange, onFilesChange,
+// Added basic file operations (rename, delete, etc.)
+
+function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryChange, searchResults, onSearchResultsChange, onFilesChange, onEntriesChange,
 }) {
   const [searching, setSearching] = useState(false);
+  const [operationPending, setOperationPending] = useState(false);
+  const [operationError, setOperationError] = useState("");
+  const [operationStatus, setOperationStatus] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  async function runOperation(route, method, params, successMessage) {
+    setOperationPending(true);
+    setOperationError("");
+    setOperationStatus("");
+
+    try {
+      const response = await fetch(
+        `${API}${route}?${new URLSearchParams(params)}`,
+        { method }
+      );
+      if (!response.ok) {
+        const detail = (await response.text()).trim();
+        throw new Error(detail || `Request failed: ${response.status}`);
+      }
+    } catch (error) {
+      setOperationError(error.message || "The operation failed.");
+      setOperationPending(false);
+      return;
+    }
+
+    setOperationStatus(successMessage);
+    try {
+      const response = await fetch(
+        `${API}/folder?path=${encodeURIComponent(path)}`
+      );
+      if (!response.ok) {
+        const detail = (await response.text()).trim();
+        throw new Error(detail || `Request failed: ${response.status}`);
+      }
+      onEntriesChange(await response.json());
+      onQueryChange("");
+      onSearchResultsChange(null);
+      setSelectedFile(null);
+    } catch (error) {
+      setOperationError(
+        `${successMessage}, but the folder could not be refreshed: ${error.message}`
+      );
+    } finally {
+      setOperationPending(false);
+    }
+  }
+
+  function renameEntry(entry) {
+    const newName = window.prompt("Enter a new name:", entry.name);
+    if (newName === null) return;
+
+    const trimmedName = newName.trim();
+    if (!trimmedName || trimmedName === "." || trimmedName === ".." ||
+        /[\\/]/.test(trimmedName)) {
+      setOperationError("Enter a valid name without path separators.");
+      return;
+    }
+    if (trimmedName === entry.name) return;
+    if (entries.some((other) =>
+      other.fullPath !== entry.fullPath &&
+      other.name.toLocaleLowerCase() === trimmedName.toLocaleLowerCase()
+    )) {
+      setOperationError("An item with that name already exists in this folder.");
+      return;
+    }
+
+    const separator = entry.fullPath.includes("\\") ? "\\" : "/";
+    const separatorIndex = entry.fullPath.lastIndexOf(separator);
+    const parentPath = entry.fullPath.slice(0, separatorIndex);
+    const newPath = `${parentPath}${parentPath.endsWith(separator) ? "" : separator}${trimmedName}`;
+    const itemType = entry.isDirectory ? "folder" : "file";
+    runOperation(
+      `/${itemType}`,
+      "PATCH",
+      { oldPath: entry.fullPath, newPath },
+      `${itemType === "folder" ? "Folder" : "File"} renamed.`
+    );
+  }
+
+  function deleteEntry(entry) {
+    const itemType = entry.isDirectory ? "folder" : "file";
+    const warning = entry.isDirectory
+      ? `Permanently delete "${entry.name}" and everything inside it?`
+      : `Permanently delete "${entry.name}"?`;
+    if (!window.confirm(warning)) return;
+
+    runOperation(
+      `/${itemType}`,
+      "DELETE",
+      { path: entry.fullPath },
+      `${itemType === "folder" ? "Folder" : "File"} deleted.`
+    );
+  }
+
+  function openFile(entry) {
+    runOperation(
+      "/open",
+      "POST",
+      { path: entry.fullPath },
+      "File opened."
+    );
+  }
+
+  function createFolder() {
+    const name = window.prompt("Name for the new folder:");
+    if (name === null) return;
+
+    const trimmedName = name.trim();
+    if (!trimmedName || trimmedName === "." || trimmedName === ".." ||
+        /[\\/]/.test(trimmedName)) {
+      setOperationError("Enter a valid folder name without path separators.");
+      return;
+    }
+    if (entries.some((entry) =>
+      entry.name.toLocaleLowerCase() === trimmedName.toLocaleLowerCase()
+    )) {
+      setOperationError("An item with that name already exists in this folder.");
+      return;
+    }
+
+    const separator = path.includes("\\") ? "\\" : "/";
+    const folderPath = `${path}${path.endsWith(separator) ? "" : separator}${trimmedName}`;
+    runOperation(
+      "/folder",
+      "POST",
+      { path: folderPath },
+      "Folder created."
+    );
+  }
+
+  function renderActions(entry) {
+    return (
+      <>
+        {!entry.isDirectory && (
+          <button
+            type="button"
+            className="theme-button"
+            onClick={() => openFile(entry)}
+            disabled={operationPending}
+          >
+            Open
+          </button>
+        )}
+        <button
+          type="button"
+          className="theme-button"
+          onClick={() => renameEntry(entry)}
+          disabled={operationPending}
+        >
+          Rename
+        </button>
+        <button
+          type="button"
+          className="theme-button"
+          onClick={() => deleteEntry(entry)}
+          disabled={operationPending}
+        >
+          Delete
+        </button>
+      </>
+    );
+  }
 
   // Debounced call to the real /search endpoint on port 5001
   useEffect(() => {
@@ -114,6 +278,52 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
 
   const folders = entries.filter((e) => e.isDirectory);
   const files = entries.filter((e) => !e.isDirectory);
+  const selectedFileIsVisible = selectedFile?.browsePath === path && (
+    searchResults === null
+      ? files.some((file) => file.fullPath === selectedFile.fullPath)
+      : searchResults.some((file) => file.fullPath === selectedFile.fullPath)
+  );
+
+  function renderSelectedFileActions() {
+    if (!selectedFileIsVisible) return null;
+
+    return (
+      <section className="selected-file-actions" aria-label="Selected file actions">
+        <div>
+          <strong>{selectedFile.name}</strong>
+          <div className="secondary-text">
+            {getFileType(selectedFile.name)} · {formatBytes(selectedFile.size)}
+          </div>
+        </div>
+        <div className="selected-file-buttons">
+          <button
+            type="button"
+            className="theme-button"
+            onClick={() => openFile(selectedFile)}
+            disabled={operationPending}
+          >
+            Open
+          </button>
+          <button
+            type="button"
+            className="theme-button"
+            onClick={() => renameEntry(selectedFile)}
+            disabled={operationPending}
+          >
+            Rename
+          </button>
+          <button
+            type="button"
+            className="theme-button"
+            onClick={() => deleteEntry(selectedFile)}
+            disabled={operationPending}
+          >
+            Delete
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   useEffect(() => {
     onFilesChange(files);
@@ -130,14 +340,32 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
       >
         Back
       </button>
-      <h2>Browse</h2>
+      <button
+        type="button"
+        className="theme-button"
+        onClick={createFolder}
+        disabled={operationPending || !path}
+        style={{ margin: "0 0 12px 8px" }}
+      >
+        New folder
+      </button>
+      {operationError && (
+        <p className="operation-error" role="alert">{operationError}</p>
+      )}
+      {operationStatus && !operationError && (
+        <p className="operation-status" role="status">{operationStatus}</p>
+      )}
+      <h2>Search</h2>
       <div className="secondary-text" style={{ marginBottom: 10 }}>{path}</div>
 
       <input
         type="text"
         placeholder="Search this folder tree..."
         value={query}
-        onChange={(e) => onQueryChange(e.target.value)}
+        onChange={(e) => {
+          setSelectedFile(null);
+          onQueryChange(e.target.value);
+        }}
         className="theme-input"
       />
 
@@ -156,13 +384,25 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
                 <th>Type</th>
                 <th>Size</th>
                 <th>Directory</th>
-                <th></th>
+                <th>Folder</th>
               </tr>
             </thead>
             <tbody>
               {searchResults.map((f) => (
                 <tr key={f.fullPath}>
-                  <td>{f.name}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="file-select-button"
+                      aria-pressed={
+                        selectedFile?.browsePath === path &&
+                        selectedFile.fullPath === f.fullPath
+                      }
+                      onClick={() => setSelectedFile({ ...f, browsePath: path })}
+                    >
+                      {f.name}
+                    </button>
+                  </td>
                   <td>{getFileType(f.name)}</td>
                   <td>{formatBytes(f.size)}</td>
                   <td>{f.directory}</td>
@@ -180,6 +420,7 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
               ))}
             </tbody>
           </table>
+          {renderSelectedFileActions()}
         </details>
       ) : (
         <>
@@ -189,6 +430,7 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -199,6 +441,7 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
                     className="folder-row"
                   >
                     <td>[DIR] {f.name}</td>
+                    <td>{renderActions(f)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -218,13 +461,26 @@ function BrowsePage({entries, path, setPath, canGoBack, onBack, query, onQueryCh
               <tbody>
                 {files.map((f) => (
                   <tr key={f.fullPath}>
-                    <td>{f.name}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="file-select-button"
+                        aria-pressed={
+                          selectedFile?.browsePath === path &&
+                          selectedFile.fullPath === f.fullPath
+                        }
+                        onClick={() => setSelectedFile({ ...f, browsePath: path })}
+                      >
+                        {f.name}
+                      </button>
+                    </td>
                     <td>{getFileType(f.name)}</td>
                     <td>{formatBytes(f.size)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {renderSelectedFileActions()}
           </details>
         </>
       )}
@@ -474,6 +730,7 @@ export default function App() {
           searchResults={searchResults}
           onSearchResultsChange={setSearchResults}
           onFilesChange={setCurrentFiles}
+          onEntriesChange={setEntries}
         />
       ) : (
         <StoragePage
